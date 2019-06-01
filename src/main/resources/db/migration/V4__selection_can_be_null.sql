@@ -1,0 +1,1 @@
+alter table share alter column selection drop not null;

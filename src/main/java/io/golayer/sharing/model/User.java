@@ -1,6 +1,7 @@
 package io.golayer.sharing.model;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.Entity;
@@ -14,6 +15,7 @@ import javax.validation.constraints.NotNull;
 @Setter
 @Entity
 @Table(name = "users")
+@NoArgsConstructor
 public class User {
 
     @Id
@@ -22,4 +24,8 @@ public class User {
 
     @NotNull
     private String email;
+
+    public User(String email) {
+        this.email = email;
+    }
 }

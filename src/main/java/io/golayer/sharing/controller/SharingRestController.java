@@ -1,7 +1,10 @@
 package io.golayer.sharing.controller;
 
+import io.golayer.sharing.SharingConverter;
 import io.golayer.sharing.dto.CreateSharingRequestDto;
+import io.golayer.sharing.model.Share;
 import io.golayer.sharing.model.User;
+import io.golayer.sharing.service.ShareService;
 import io.golayer.sharing.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,11 +24,12 @@ import java.util.List;
 public class SharingRestController {
 
     private final UserService userService;
+    private final ShareService shareService;
 
     @PostMapping("/shares")
     public ResponseEntity createSharing(@RequestBody @Valid CreateSharingRequestDto request) {
-        System.out.println(request);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        List<Share> save = shareService.save(SharingConverter.convert(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(save);
     }
 
     @GetMapping("/users")
