@@ -1,6 +1,5 @@
 package io.golayer.sharing.controller;
 
-import io.golayer.sharing.SharingConverter;
 import io.golayer.sharing.dto.CreateSharingRequestDto;
 import io.golayer.sharing.model.Share;
 import io.golayer.sharing.model.User;
@@ -28,7 +27,7 @@ public class SharingRestController {
 
     @PostMapping("/shares")
     public ResponseEntity createSharing(@RequestBody @Valid CreateSharingRequestDto request) {
-        List<Share> save = shareService.save(SharingConverter.convert(request));
+        List<Share> save = shareService.save(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(save);
     }
 
