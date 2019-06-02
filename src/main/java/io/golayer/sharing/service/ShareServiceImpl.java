@@ -85,7 +85,7 @@ public class ShareServiceImpl implements ShareService {
         return ShareResponseDto.builder()
                 .id(share.getId())
                 .selection(share.getSelection())
-                .sheet(share.getSheet().name())
+                .sheet(share.getSheet().getName())
                 .emails(emails)
                 .build();
     }
