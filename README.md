@@ -5,7 +5,7 @@ As a microservice, it should fit microservice infrastructure (including config, 
 
 ## How to build
 
-Use [maven](https://maven.apache.org/download.cgi) as a build tool or just download the [latest build]()
+Use [maven](https://maven.apache.org/download.cgi) as a build tool or just download the [latest build](https://github.com/rublin/LayerSharing/releases/download/0.1/sharing-0.0.1-SNAPSHOT.jar)
 
 ```
 mvn clean install
