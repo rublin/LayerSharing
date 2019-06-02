@@ -1,6 +1,7 @@
 package io.golayer.sharing.service;
 
 import io.golayer.sharing.dto.CreateSharingRequestDto;
+import io.golayer.sharing.dto.SelectionDto;
 import io.golayer.sharing.dto.ShareResponseDto;
 import io.golayer.sharing.model.Share;
 import io.golayer.sharing.model.Sheet;
@@ -11,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toList;
@@ -40,7 +43,7 @@ public class ShareServiceImpl implements ShareService {
                 .map(email -> userService.findOrCreate(email.getEmail()))
                 .collect(toList());
         List<Share> shares = request.getSelections().stream()
-                .map(selection -> createShare(selection.getSelection(), users))
+                .map(selection -> createShare(selection, users))
                 .collect(toList());
         return shares;
     }
@@ -51,15 +54,23 @@ public class ShareServiceImpl implements ShareService {
                 .collect(toList());
     }
 
-    private Share createShare(String selection, List<User> users) {
-        selection = selection.replaceAll("'", "");
-        String[] split = selection.split("!");
+    private Share createShare(SelectionDto selection, List<User> users) {
+        String selectionString = selection.getSelection().replaceAll("'", "");
+        String[] split = selectionString.split("!");
         Sheet sheet = Sheet.fromRequest(split[0]);
         String shareSelection = null;
         if (split.length == 2) {
             shareSelection = split[1];
         }
+
         Share share = new Share();
+        if (Objects.nonNull(selection.getId())) {
+            Optional<Share> optionalShare = shareRepository.findById(selection.getId());
+            if (optionalShare.isPresent()) {
+                share.setId(selection.getId());
+            }
+        }
+
         share.setSheet(sheet);
         share.setUsers(users);
         share.setSelection(shareSelection);
