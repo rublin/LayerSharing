@@ -1,7 +1,7 @@
 package io.golayer.sharing.service;
 
-import com.google.common.collect.Lists;
 import io.golayer.sharing.dto.CreateSharingRequestDto;
+import io.golayer.sharing.dto.ShareResponseDto;
 import io.golayer.sharing.model.Share;
 import io.golayer.sharing.model.Sheet;
 import io.golayer.sharing.model.User;
@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toList;
 
@@ -23,22 +24,18 @@ public class ShareServiceImpl implements ShareService {
     private final UserService userService;
 
     @Override
-    public List<Share> save(CreateSharingRequestDto request) {
-        return Lists.newArrayList(shareRepository.saveAll(convert(request)));
+    public List<ShareResponseDto> save(CreateSharingRequestDto request) {
+        Iterable<Share> savedShares = shareRepository.saveAll(convert(request));
+        //TODO here we should send an event to another micro service to generate a new document
+        return convert(savedShares);
     }
 
     @Override
-    public List<Share> save(List<Share> shares) {
-        log.info("New {} shares created", shares.size());
-        return Lists.newArrayList(shareRepository.saveAll(shares));
+    public List<ShareResponseDto> getAll() {
+        return convert(shareRepository.findAll());
     }
 
-    @Override
-    public List<Share> findByEmail(String email) {
-        return null;
-    }
-
-    public List<Share> convert(CreateSharingRequestDto request) {
+    private List<Share> convert(CreateSharingRequestDto request) {
         List<User> users = request.getEmails().stream()
                 .map(email -> userService.findOrCreate(email.getEmail()))
                 .collect(toList());
@@ -46,6 +43,12 @@ public class ShareServiceImpl implements ShareService {
                 .map(selection -> createShare(selection.getSelection(), users))
                 .collect(toList());
         return shares;
+    }
+
+    private List<ShareResponseDto> convert(Iterable<Share> shares) {
+        return StreamSupport.stream(shares.spliterator(), false)
+                .map(this::createShareResponse)
+                .collect(toList());
     }
 
     private Share createShare(String selection, List<User> users) {
@@ -62,5 +65,17 @@ public class ShareServiceImpl implements ShareService {
         share.setSelection(shareSelection);
 
         return share;
+    }
+
+    private ShareResponseDto createShareResponse(Share share) {
+        List<String> emails = share.getUsers().stream()
+                .map(User::getEmail)
+                .collect(toList());
+        return ShareResponseDto.builder()
+                .id(share.getId())
+                .selection(share.getSelection())
+                .sheet(share.getSheet().name())
+                .emails(emails)
+                .build();
     }
 }
